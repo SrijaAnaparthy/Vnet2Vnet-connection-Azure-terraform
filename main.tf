@@ -1,13 +1,13 @@
 #connection between two Azure virtual network in different locations/regions.
 
 
-#Reosurce group creation at location - West Europe
+#Resource group creation at location - West Europe
 resource "azurerm_resource_group" "Eur-rg" {
   name     = "Europe-RG"
   location = "West Europe"
 }
 
-#NSG for RG
+#NSG for US-RG
 resource "azurerm_network_security_group" "Eur-NSG" {
   name                = "Europe-NSG"
   location            = azurerm_resource_group.Eur-rg.location
@@ -22,13 +22,13 @@ resource "azurerm_virtual_network" "Eur-Vnet" {
   address_space       = ["10.0.0.0/16"]
   dns_servers         = ["10.0.0.4", "10.0.0.5"]
 
-#subnet 1 in vnet named example-network - addr prefix : 10.0.2.0/24
+#subnet 1 in vnet named Eur-Vnet - addr prefix : 10.0.2.0/24
   subnet {
     name           = "Eur-subnet1"
     address_prefix = "10.0.2.0/24"
   }
 
-#subnet 2 in vnet named example-network - addr prefix : 10.0.3.0/24
+#subnet 2 in vnet named Eur-Vnet - addr prefix : 10.0.3.0/24
   subnet {
     name           = "Eur-subnet2"
     address_prefix = "10.0.3.0/24"
@@ -48,7 +48,7 @@ resource "azurerm_subnet" "Eur-subnet" {
   address_prefixes     = ["10.0.1.0/24"]
 }
 
-#Dynamic public ip creation 
+#Dynamic public ip creation to associate it with gateway
 resource "azurerm_public_ip" "Eur-pubip" {
   name                = "Eur-pubip"
   location            = azurerm_resource_group.Eur-rg.location
@@ -57,7 +57,7 @@ resource "azurerm_public_ip" "Eur-pubip" {
   allocation_method = "Dynamic"
 }
 
-#Vnet gateway creation 
+#Vnet gateway creation - Eur-Vnet
 resource "azurerm_virtual_network_gateway" "Eur-Vnet-gateway" {
   name                = "Eur-gateway"
   location            = azurerm_resource_group.Eur-rg.location
@@ -83,20 +83,20 @@ resource "azurerm_virtual_network_gateway" "Eur-Vnet-gateway" {
 
 #Vnet2 creation at location - East US
 
-#Reosurce group creation at location - West Europe
+#Resource group creation at location - East US
 resource "azurerm_resource_group" "US-rg" {
   name     = "US-RG"
   location = "East US"
 }
 
-#NSG for RG
+#NSG for US-RG 
 resource "azurerm_network_security_group" "US-NSG" {
   name                = "US-NSG"
   location            = azurerm_resource_group.US-rg.location
   resource_group_name = azurerm_resource_group.US-rg.name
 }
 
-#Vnet creation with address space 10.0.0.0/16
+#Vnet creation with address space 10.1.0.0/16
 resource "azurerm_virtual_network" "US-Vnet" {
   name                = "US-network"
   location            = azurerm_resource_group.US-rg.location
@@ -104,13 +104,13 @@ resource "azurerm_virtual_network" "US-Vnet" {
   address_space       = ["10.1.0.0/16"]
   dns_servers         = ["10.1.0.4", "10.1.0.5"]
 
-#subnet 1 in vnet named example-network - addr prefix : 10.0.2.0/24
+#subnet 1 in vnet named US-Vnet - addr prefix : 10.1.2.0/24
   subnet {
     name           = "US-subnet1"
     address_prefix = "10.1.2.0/24"
   }
 
-#subnet 2 in vnet named example-network - addr prefix : 10.0.3.0/24
+#subnet 2 in vnet named US-Vnet - addr prefix : 10.1.3.0/24
   subnet {
     name           = "US-subnet2"
     address_prefix = "10.1.3.0/24"
@@ -122,7 +122,7 @@ resource "azurerm_virtual_network" "US-Vnet" {
   }
 }
 
-#gateway subnet creation with address space : 10.0.1.0/24
+#gateway subnet creation with address space : 10.1.1.0/24
 resource "azurerm_subnet" "US-subnet" {
   name                 = "GatewaySubnet"
   resource_group_name  = azurerm_resource_group.US-rg.name
@@ -130,7 +130,7 @@ resource "azurerm_subnet" "US-subnet" {
   address_prefixes     = ["10.1.1.0/24"]
 }
 
-#Dynamic public ip creation 
+#Dynamic public ip creation to associate it with gateway
 resource "azurerm_public_ip" "US-pubip" {
   name                = "US-pubip"
   location            = azurerm_resource_group.US-rg.location
@@ -139,7 +139,7 @@ resource "azurerm_public_ip" "US-pubip" {
   allocation_method = "Dynamic"
 }
 
-#Vnet gateway creation 
+#Vnet gateway creation for US-Vnet
 resource "azurerm_virtual_network_gateway" "US-Vnet-gateway" {
   name                = "US-gateway"
   location            = azurerm_resource_group.US-rg.location
